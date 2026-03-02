@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+       <h1>To Do list</h1>
+    Add a new todo... <br><input type='text' id = 'idea' />
+<input type='button' value = 'add to list' id = 'add'>
+
+<ul id= 'list'> 
+ <li><b>Topics:</b></li> 
+</ul>
+<button onclick="RemoveAllTodos()">Remove All</button>
+
+    </div>
+   
+<script type="text/javascript">
+    // Save todos to localStorage
+    function saveTodos() {
+        var list = document.getElementById('list');
+        var items = list.getElementsByTagName('li');
+        var todoArray = [];
+        
+        // Start from index 1 to skip the "Topics:" header
+        for (var i = 1; i < items.length; i++) {
+            var li = items[i];
+            var text = li.querySelector('.todo-text').textContent;
+            var done = li.classList.contains('done') ? '1' : '0';
+            todoArray.push(text + '::' + done);
+        }
+        
+        localStorage.setItem('todos', todoArray.join('|'));
+    }
+
+    // Load saved todos when page loads
+    function loadTodos() {
+        var storedTodos = localStorage.getItem('todos');
+        if (!storedTodos) return;
+
+        var todoArray = storedTodos.split('|');
+        for (var i = 0; i < todoArray.length; i++) {
+            if (todoArray[i] === '') continue;
+
+            var parts = todoArray[i].split('::');
+            var text = parts[0];
+            var done = parts[1] === '1';
+
+            addTodoToList(text);
+
+            // mark last added as done if needed
+            var list = document.getElementById('list');
+            var lastLi = list.lastElementChild;
+            if (done) lastLi.classList.add('done');
+        }
+    }
+
+   function addTodoToList(text) {
+  var list = document.getElementById('list');
+  var li = document.createElement('li');
+
+  li.innerHTML =
+    '<span class="todo-text">' + text + '</span>' +
+    ' <button onclick="toggleDone(this)">Done</button>' +
+    ' <button onclick="removeTodo(this)">X</button>';
+
+  list.appendChild(li);
+}
+function toggleDone(button){
+  var li = button.parentNode;
+  li.classList.toggle('done');
+  saveTodos(); // so it persists
+}
+
+    document.getElementById('add').onclick = function() {
+        var text = document.getElementById('idea').value;
+        
+        if (text !== '') {
+            addTodoToList(text);
+            
+            // Clear input field
+            document.getElementById('idea').value = '';
+            
+            // Save to localStorage
+            saveTodos();
+        }
+    }
+
+    // Remove individual todo
+    function removeTodo(button) {
+        var li = button.parentNode;
+        li.parentNode.removeChild(li);
+        saveTodos();
+    }
+
+    // Remove all todos
+    function RemoveAllTodos(){
+        var list = document.getElementById('list');
+        // Remove all li elements except the first one (Topics)
+        var items = list.getElementsByTagName('li');
+        while (items.length > 1) {
+            list.removeChild(items[1]);
+        }
+        // Clear localStorage
+        localStorage.removeItem('todos');
+    }
+
+    // Load todos when page loads
+    loadTodos();
+   
+</script>
+</body>
+</html>
+
